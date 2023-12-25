@@ -9,42 +9,38 @@ const MIN_PLAYTIME = process.env.MIN_PLAYTIME ?? 60;
 async function main() {
   let sharedApps = new Map();
 
-  for (const user of STEAM_USER_IDS) {
+  for (const i in STEAM_USER_IDS) {
     const userGamesResponse = await fetch(
       `${STEAM_BASE_URI}/IPlayerService/GetOwnedGames/v0001/?` +
         new URLSearchParams({
-          steamid: user,
+          steamid: STEAM_USER_IDS[i],
           include_played_free_games: true,
           include_appinfo: true,
         }),
       { headers: { "x-webapi-key": STEAM_API_KEY } }
     );
 
-    console.log(userGamesResponse);
     if (!userGamesResponse.ok) {
-      const resText = await res.text();
+      const resText = await userGamesResponse.text();
       console.log(resText);
       throw new Error(resText);
     }
     const responseData = await userGamesResponse.json();
 
-    console.log(responseData);
-
     const filteredApps = new Map(
-      responseData.response.games
-        .filter((x) => x.playtime_forever >= MIN_PLAYTIME)
+      responseData?.response?.games
+        ?.filter((x) => x.playtime_forever >= MIN_PLAYTIME)
         .map((obj) => [
           obj.appid,
           { name: obj.name, storeUri: `https://store.steampowered.com/app/${obj.appid}` },
         ])
     );
-    utils.intersection(sharedApps, filteredApps);
-    sharedApps = sharedApps.size == 0 ? filteredApps : utils.intersection(sharedApps, filteredApps);
+    sharedApps = i == 0 ? filteredApps : utils.intersection(sharedApps, filteredApps);
   }
   console.log(`Shared games: ${JSON.stringify([...sharedApps.values()], null, 2)}`);
   console.log(`Users: ${JSON.stringify(STEAM_USER_IDS, null, 2)}`);
   console.log(`Minimum playtime: ${MIN_PLAYTIME}`);
-  console.log(`Shared games count: ${sharedApps.size}`);
+  console.log(`Number of shared games: ${sharedApps.size}`);
 }
 
 main();
