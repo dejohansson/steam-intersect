@@ -39,7 +39,7 @@ async function main() {
   }
   console.log(`Shared games: ${JSON.stringify([...sharedApps.values()], null, 2)}`);
   console.log(`Users: ${JSON.stringify(STEAM_USER_IDS, null, 2)}`);
-  console.log(`Minimum playtime: ${MIN_PLAYTIME}`);
+  console.log(`Minimum playtime (in minutes): ${MIN_PLAYTIME}`);
   console.log(`Number of shared games: ${sharedApps.size}`);
 }
 
